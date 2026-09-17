@@ -1,0 +1,104 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+enum EmailStatus {
+  QUEUED
+  SENDING
+  DELIVERED
+  FAILED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  apiKeys ApiKey[]
+  domains Domain[]
+  emails  Email[]
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  name      String
+  prefix    String    @unique
+  hash      String
+  userId    String
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([userId])
+}
+
+model Domain {
+  id     String @id @default(cuid())
+  domain String @unique
+  userId String
+
+  status   DomainStatus @default(PENDING)
+  failedAt DateTime?
+
+  // ownership verification
+  verifyToken String
+  verifiedAt  DateTime?
+
+  // DKIM
+  dkimPrivateKey String
+  dkimPublicKey  String
+  dkimSelector   String @default("resend")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emails Email[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Email {
+  id       String  @id @default(cuid())
+  userId   String
+  domainId String?
+
+  from    String
+  to      String[]
+  replyTo String?
+
+  subject String
+  html    String?
+  text    String?
+
+  status     EmailStatus @default(QUEUED)
+  failReason String?
+  sentAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain Domain? @relation(fields: [domainId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
