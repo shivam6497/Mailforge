@@ -1,0 +1,2 @@
+-- CreateEnum
+CREATE TYPE "EmailStatus" AS ENUM ('QUEUED', 'SENDING', 'DELIVERED', 'FAILED');
