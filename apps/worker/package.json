@@ -1,0 +1,25 @@
+{
+  "name": "@resend-clone/worker",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.1125.0",
+    "@aws-sdk/client-sesv2": "^3.1126.0",
+    "@resend-clone/db": "workspace:*",
+    "@resend-clone/queue": "workspace:*",
+    "@resend-clone/types": "workspace:*",
+    "bullmq": "^5.0.0",
+    "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@resend-clone/typescript-config": "workspace:*",
+    "@types/nodemailer": "^6.4.0",
+    "dotenv-cli": "^7.4.4",
+    "tsx": "^4.10.2",
+    "typescript": "^5.0.0"
+  }
+}
